@@ -6,7 +6,7 @@
 /*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 17:11:22 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/14 23:23:46 by balthazar        ###   ########.fr       */
+/*   Updated: 2024/03/19 21:08:50 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ typedef struct s_history
 
 typedef struct s_minishell
 {
+	int			is_init_cmds;
 	int			ex_hrd;
 	int			ret;
 	int			ac;
@@ -69,6 +70,7 @@ typedef struct s_minishell
 	char		*path;
 	char		**env;
 	char		**av;
+	char		***cmds;
 	t_history	*history;
 }	t_minishell;
 
@@ -83,21 +85,22 @@ void			parse(t_minishell *minishell);
 int				exec_cmd(t_minishell *minishell, char *line);
 char			**get_path_dirs(char **env);
 char			*get_cmd_path(char *cmd, char **env);
-int				here_doc(t_minishell *minishell, char *delimiter, char *cmd);
-int				exec_redirect(t_minishell *minishell, char *line, char *cmd,
+int				here_doc(t_minishell *minishell, char *delimiter);
+int				exec_redirect(t_minishell *minishell, char *line,
 					t_redirect_code code);
 bool			builtins(t_minishell *minishell, char *cmd);
 int				run_cmd(t_minishell *minishell, char *cmd_name);
 int				run_single_cmd(t_minishell *minishell, char *cmd_name,
-					char **cmds, int *original_fd);
-int				create_pipe(t_minishell *minishell, char **cmds, int i,
+					char ***cmds, int *original_fd);
+int				create_pipe(t_minishell *minishell, char ***cmds, int j, int i,
 					int *original_fd);
 char			**ft_split_quotes(char *s, char c);
 char			*ft_filltab(char *line, char c, int pos);
 char			***split_cmds(char *line);
-void			*free_cmds_tab(char ***tab, char **to_add,
+void			free_cmds_tab(char ***tab, char **to_add,
 					int tab_size, int add_size);
 void			*free_big_tab(char ***tab);
+void			*fbtn(char ***tab, int j, int i);
 // Redirections
 int				input(t_minishell *minishell, char *file);
 

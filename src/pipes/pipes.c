@@ -6,7 +6,7 @@
 /*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 21:39:01 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/15 16:12:38 by balthazar        ###   ########.fr       */
+/*   Updated: 2024/03/20 00:41:22 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ int	run_cmd(t_minishell *minishell, char *cmd_name)
 	return (0);
 }
 
-int	run_single_cmd(t_minishell *minishell, char *cmd_name, char **cmds,
+int	run_single_cmd(t_minishell *minishell, char *cmd_name, char ***cmds,
 		int *original_fd)
 {
 	int			fds[2];
@@ -103,8 +103,8 @@ int	run_single_cmd(t_minishell *minishell, char *cmd_name, char **cmds,
 			if (*original_fd != STDIN_FILENO)
 				close(*original_fd);
 			if (run_cmd(minishell, cmd_name) == -1)
-				(free_all(minishell), ft_freetab(cmds), exit(EXIT_FAILURE));
-			(ft_freetab(cmds), free_all(minishell), exit(EXIT_SUCCESS));
+				(free_all(minishell), free_big_tab(cmds), exit(EXIT_FAILURE));
+			(free_big_tab(cmds), free_all(minishell), exit(EXIT_SUCCESS));
 		}
 		if (*original_fd != STDIN_FILENO)
 			close(*original_fd);
@@ -113,7 +113,7 @@ int	run_single_cmd(t_minishell *minishell, char *cmd_name, char **cmds,
 	return (0);
 }
 
-int	create_pipe(t_minishell *minishell, char **cmds, int i, int *original_fd)
+int	create_pipe(t_minishell *minishell, char ***cmds, int j, int i, int *original_fd)
 {
 	int		fds[2];
 	pid_t	pid;
@@ -126,15 +126,17 @@ int	create_pipe(t_minishell *minishell, char **cmds, int i, int *original_fd)
 	if (pid == 0)
 	{
 		dup2(*original_fd, STDIN_FILENO);
-		if (cmds[i + 1] != NULL)
+		if (cmds[j][i + 1] != NULL)
 			dup2(fds[1], STDOUT_FILENO);
 		(close(fds[0]), close(fds[1]));
 		if (*original_fd != STDIN_FILENO)
 			close(*original_fd);
-		cmds[i] = remove_redirections(minishell, cmds[i], 0);
-		if (run_single_cmd(minishell, cmds[i], cmds, original_fd) == -1)
-			(free_all(minishell), ft_freetab(cmds), exit(EXIT_FAILURE));
-		(ft_freetab(cmds), free_all(minishell), exit(EXIT_SUCCESS));
+		cmds[j][i] = remove_redirections(minishell, cmds[j][i], 0);
+		if (!cmds[j][i])
+			(free_all(minishell), fbtn(cmds, j, i), exit(EXIT_FAILURE));
+		if (run_single_cmd(minishell, cmds[j][i], cmds, original_fd) == -1)
+			(free_all(minishell), free_big_tab(cmds), exit(EXIT_FAILURE));
+		(free_big_tab(cmds), free_all(minishell), exit(EXIT_SUCCESS));
 	}
 	if (*original_fd != STDIN_FILENO)
 		close(*original_fd);
@@ -148,41 +150,42 @@ int	exec_cmd(t_minishell *minishell, char *line)
 	int		i;
 	int		j;
 	int		original_fd;
-	char	***cmd_tab;
 
 	original_fd = STDIN_FILENO;
+	g_exit = 0;
 	i = -1;
 	j = 0;
 	minishell->ex_hrd = 1;
 	if (line)
-	{
-		cmd_tab = split_cmds(line);
-		free(line);
-	}
+		minishell->cmds = split_cmds(line);
 	else
-		cmd_tab = split_cmds(minishell->line);
-	if (!cmd_tab)
+		minishell->cmds = split_cmds(minishell->line);
+	if (!minishell->cmds)
 		return (get_error(minishell, NULL));
-	if (!cmd_tab[0][1])
+	if (!minishell->cmds[0][1] && !minishell->cmds[1])
 	{
-		cmd_tab[0][0] = remove_redirections(minishell, cmd_tab[0][0], 0);
-		if (run_single_cmd(minishell, cmd_tab[0][0], cmd_tab[0], &original_fd) == -1)
-			return (set_g_exit(0), -1);
-		return (set_g_exit(0), free_big_tab(cmd_tab), 0);
+		minishell->cmds[0][0] = remove_redirections(minishell, minishell->cmds[0][0], 0);
+		if (!minishell->cmds[0][0] || !minishell->cmds[0][0][0] || g_exit == 1)
+			return(free_big_tab(minishell->cmds), -1);
+		if (run_single_cmd(minishell, minishell->cmds[0][0], minishell->cmds, &original_fd) == -1)
+			return (free_big_tab(minishell->cmds), set_g_exit(0), -1);
+		return (set_g_exit(0), free_big_tab(minishell->cmds), 0);
 	}
-	while (cmd_tab[j])
+	while (minishell->cmds[j])
 	{
 		i = -1;
-		while (cmd_tab[j][++i])
+		while (minishell->cmds[j][++i])
 		{
-			if (cmd_tab[j][i + 1] && has_heredoc(cmd_tab[j][i]))
+			if (minishell->cmds[j][i + 1] && has_heredoc(minishell->cmds[j][i]))
 				minishell->ex_hrd = 0;
-			cmd_tab[j][i] = remove_redirections(minishell, cmd_tab[j][i], 1);
-			if (create_pipe(minishell, cmd_tab[j], i, &original_fd) == -1)
-				return (free_big_tab(cmd_tab), -1);
+			minishell->cmds[j][i] = remove_redirections(minishell, minishell->cmds[j][i], 1);
+			if (g_exit == 1)
+				return (free_big_tab(minishell->cmds), -1);
+			if (create_pipe(minishell, minishell->cmds, j, i, &original_fd) == -1)
+				return (free_big_tab(minishell->cmds), -1);
 		}
 		j++;
 	}
 	close(original_fd);
-	return (free_big_tab(cmd_tab), 0);
+	return (free_big_tab(minishell->cmds), 0);
 }

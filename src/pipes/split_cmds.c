@@ -6,7 +6,7 @@
 /*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 00:17:47 by balthazar         #+#    #+#             */
-/*   Updated: 2024/03/15 16:11:53 by balthazar        ###   ########.fr       */
+/*   Updated: 2024/03/17 17:14:27 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ char	***init_tab(char **cmds)
 	{
 		while (cmds[i] && cmds[i][j])
 		{
-			if (cmds[i][j] == '>' || cmds[i][j] == '<')
+			if (cmds[i][j] == '>')
 			{
 				nb++;
 				break ;
@@ -132,5 +132,6 @@ char	***split_cmds(char *line)
 	res = filltab(res, cmds);
 	if (!res)
 		return (ft_freetab(cmds), NULL);
-	return (ft_freetab(cmds), res);
+	ft_freetab(cmds);
+	return (res);
 }

@@ -3,58 +3,57 @@
 /*                                                        :::      ::::::::   */
 /*   exit.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 20:29:06 by soelalou          #+#    #+#             */
-/*   Updated: 2024/02/29 04:29:03 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 16:22:19 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	parsing(char *args)
+int	parsing(t_minishell *minishell, char *args)
 {
 	int		i;
-	bool	is_alpha;
 	char	**splited_args;
 
 	i = 0;
 	splited_args = ft_split(args, ' ');
 	if (!splited_args)
 		return (-1);
-	while (args[i])
+	if (ft_tabsize(splited_args) > 2)
+		return (ft_freetab(splited_args), 1);
+	if (!splited_args[1])
+		return (ft_freetab(splited_args), 0);
+	while (splited_args[1][i])
 	{
-		if (ft_isalpha(args[i]) && !is_alpha)
-			return (2);
-		if (args[i] >= '0' && args[i] <= '9')
-			is_alpha = true;
+		if (!ft_isdigit(splited_args[1][i]) && !is_space(splited_args[1][i]))
+			return (ft_freetab(splited_args), 2);
 		i++;
 	}
-	if (ft_tabsize(splited_args) > 1)
-		return (1);
-	return (0);
+	minishell->ret = ft_atoi(splited_args[1]);
+	return (ft_freetab(splited_args), 0);
 }
 
 int	ft_exit(t_minishell *minishell, char *args)
 {
 	int	ret;
 
-	ret = parsing(args);
-	minishell->exit = true;
+	minishell->ret = 255;
+	ret = parsing(minishell, args);
 	if (ret == 1)
 	{
 		ft_printf("minishell: exit: too many arguments\n");
 		minishell->ret = 5;
-		minishell->exit = false;
 		return (minishell->ret);
 	}
 	else if (ret == 2)
 	{
 		ft_printf("minishell: exit: %s: numeric argument required\n", args);
 		minishell->ret = 255;
-		exit(255);
+		(free_all(minishell), free_big_tab(minishell->cmds));
+		exit(minishell->ret);
 	}
-	if (args)
-		return (ft_atoi(args));
-	return (0);
+	(free_all(minishell), free_big_tab(minishell->cmds));
+	exit(minishell->ret);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_tabdup.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 20:17:33 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/05 16:23:27 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 12:41:13 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ char	**ft_tabdup(char **tab)
 		return (NULL);
 	while (tab[i])
 		i++;
-	ret = (char **)malloc(sizeof(char *) * (i + 1));
+	ret = (char **)malloc(sizeof(char *) * (i + 2));
 	if (!ret)
 		return (NULL);
 	i = 0;

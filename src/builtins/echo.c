@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 20:26:56 by soelalou          #+#    #+#             */
-/*   Updated: 2024/02/29 04:50:00 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 16:45:16 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,7 @@ char	*rmv_quotes(char *cmd)
 	return (cmd);
 }
 
-static int	check(char *cmd,
-			int *quoted, bool *display_line)
+static int	check(char *cmd, bool *display_line)
 {
 	int	i;
 
@@ -54,20 +53,10 @@ static int	check(char *cmd,
 		return (1);
 	else if (cmd[i + 1] && cmd[i + 1] == '-' && cmd[i + 2] == 'n')
 		*display_line = false;
-	if (cmd[i + 1] && (cmd[i + 1] == '"' || cmd[i + 1] == '\'')
-		&& cmd[ft_strlen(cmd) - 1] != cmd[i + 1])
-		return (1);
-	else
-	{
-		if (cmd[i + 1] && (cmd[i + 1] == '"' || cmd[i + 4] == '"'))
-			*quoted = 1;
-		else if (cmd[i + 1] && (cmd[i + 1] == '\'' || cmd[i + 4] == '\''))
-			*quoted = 2;
-	}
 	return (0);
 }
 
-static char	*get_str(char *cmd, bool display_line, int quoted)
+static char	*get_str(char *cmd, bool display_line)
 {
 	int		j;
 	char	*str;
@@ -81,9 +70,7 @@ static char	*get_str(char *cmd, bool display_line, int quoted)
 	j = 0;
 	while (cmd[j])
 	{
-		if ((quoted == 1 && cmd[j] == '"')
-			|| (quoted == 2 && cmd[j] == '\'')
-			|| (!display_line && cmd[j] == '\n'))
+		if (!display_line && cmd[j] == '\n')
 			break ;
 		str[j] = cmd[j];
 		j++;
@@ -97,17 +84,15 @@ static char	*get_str(char *cmd, bool display_line, int quoted)
 int	ft_echo(t_minishell *minishell, char *cmd)
 {
 	int		i;
-	int		quoted;
 	bool	display_line;
 	char	*str;
 
 	i = 0;
-	quoted = 0;
 	display_line = true;
 	if (!cmd[4])
 		return (1);
 	cmd = rmv_quotes(cmd);
-	if (check(cmd, &quoted, &display_line) == -1)
+	if (check(cmd, &display_line) == -1)
 		return (0);
 	while (cmd[i] && !is_space(cmd[i]))
 		i++;
@@ -115,9 +100,7 @@ int	ft_echo(t_minishell *minishell, char *cmd)
 		i++;
 	if (!display_line)
 		i += 3;
-	if (quoted)
-		i++;
-	str = get_str(cmd + i, display_line, quoted);
+	str = get_str(cmd + i, display_line);
 	if (!str)
 		return (get_error(minishell, NULL));
 	return (ft_printf("%s", str), free(str), 0);

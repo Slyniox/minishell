@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   redirections.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/08 11:47:00 by soelalou          #+#    #+#             */
-/*   Updated: 2024/02/18 03:17:49 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 20:21:04 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ static int	append(t_minishell *minishell, char *file)
 	return (0);
 }
 
-int	exec_redirect(t_minishell *minishell, char *line, char *cmd,
+int	exec_redirect(t_minishell *minishell, char *line,
 		t_redirect_code code)
 {
 	if (code == INPUT)
@@ -65,7 +65,7 @@ int	exec_redirect(t_minishell *minishell, char *line, char *cmd,
 	else if (code == OUTPUT)
 		return (output(minishell, line));
 	else if (code == HEREDOC)
-		return (here_doc(minishell, line, cmd));
+		return (here_doc(minishell, line));
 	else if (code == APPEND)
 		return (append(minishell, line));
 	else

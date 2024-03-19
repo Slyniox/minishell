@@ -6,7 +6,7 @@
 /*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 19:51:19 by balt              #+#    #+#             */
-/*   Updated: 2024/03/14 16:16:11 by balthazar        ###   ########.fr       */
+/*   Updated: 2024/03/20 00:26:33 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,10 +43,9 @@ char	*remove_redirections(t_minishell *minishell, char *line, int arg)
 char	*treat_redirect(t_minishell *minishell, char *line, int pos)
 {
 	int		redir_input;
-	char	*br;
+	char	*temp;
 	char	*value;
 
-	br = NULL;
 	redir_input = 0;
 	if (!line[pos + 1])
 		return (free(line), NULL);
@@ -57,16 +56,19 @@ char	*treat_redirect(t_minishell *minishell, char *line, int pos)
 	value = get_redir_value(line, pos + redir_input);
 	if (!value)
 		return (free(line), NULL);
-	br = before_redir(line, pos, value);
 	minishell->ret = exec_redirect(minishell, rmv_alone_quotes(value),
-			br, sign_id(line, pos, redir_input));
+			sign_id(line, pos, redir_input));
 	if (minishell->ret == -1)
-		return (free(br), free(value), free(line), NULL);
+		return (free(value), free(line), NULL);
+	temp = ft_strdup(line);
 	if (sign_id(line, pos, redir_input) == HEREDOC)
-		line = cut_heredoc(line, pos, rmv_alone_quotes(value));
+	{
+		free(line);
+		line = ft_strjoin(temp, "< /tmp/heredoc\0");
+	}
 	line = rmv_useless(trimline(line, update_pos(line), redir_input));
 	line = rmv_double_pipes(line);
-	return (free(br), free(value), line);
+	return (free(temp), free(value), line);
 }
 
 char	*get_redir_value(char *line, int pos)

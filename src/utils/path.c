@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/08 10:03:08 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/05 17:12:12 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 16:52:28 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ bool	check_cd_shortcut(char *cmd)
 
 char	*get_env(t_minishell *minishell, char *value)
 {
-	int	i;
+	int		i;
+	char	*res;
 
 	i = 0;
 	if (!value)
@@ -39,7 +40,12 @@ char	*get_env(t_minishell *minishell, char *value)
 		if (ft_strncmp(value, "?", 1) == 0)
 			return (ft_itoa(minishell->ret));
 		if (ft_strncmp(minishell->env[i], value, ft_strlen(value)) == 0)
-			return (minishell->env[i] + ft_strlen(value) + 1);
+		{
+			if (!minishell->env[i][ft_strlen(value)])
+				return(NULL);
+			res = ft_strdup(minishell->env[i] + ft_strlen(value) + 1);
+			return (res);
+		}
 		i++;
 	}
 	return (NULL);

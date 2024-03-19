@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 18:03:26 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/05 15:57:26 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 23:45:05 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,7 @@ void	init(t_minishell *minishell, int ac, char **av, char **env)
 	if (!minishell->env)
 		exit(EXIT_FAILURE);
 	minishell->path = getcwd(NULL, 0);
+	minishell->is_init_cmds = 0;
+	minishell->cmds = NULL;
 	minishell->history = NULL;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   set_env_values.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 19:47:39 by balt              #+#    #+#             */
-/*   Updated: 2024/03/05 15:04:18 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/18 15:30:07 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,16 +79,16 @@ char	*insert_val(t_minishell *minishell, char *line, int pos, char *val_name)
 		return (rmv_val(minishell, pos, val_name));
 	temp = surplus(line, pos, val_name);
 	if (!temp)
-		return (NULL);
+		return (free(line), free(insert), NULL);
 	line = add_val(line, pos, insert);
 	if (!line)
-		return (free(temp), NULL);
+		return (free(insert), free(temp), NULL);
 	while (line[i])
 		i++;
 	line = add_val(line, i, temp);
 	if (!line)
-		return (NULL);
-	return (line);
+		return (free(insert), free(temp), NULL);
+	return (free(insert), free(temp), line);
 }
 
 char	*line_add_val(t_minishell *minishell, char *line, int pos)
@@ -110,7 +110,7 @@ char	*line_add_val(t_minishell *minishell, char *line, int pos)
 		line = insert_val(minishell, line, pos, NULL);
 		return (line);
 	}
-	while (j < i && !is_sep(line[j + 1 + pos], 3))
+	while (j < i && !is_sep(line[j + 1 + pos], 3) && line[pos + j] != '?')
 	{
 		to_get[j] = line[pos + j + 1];
 		j++;

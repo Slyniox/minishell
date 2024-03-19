@@ -3,14 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@42.student.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 20:41:02 by soelalou          #+#    #+#             */
-/*   Updated: 2024/02/17 02:58:08 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 23:00:20 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+char	*trim_pwd(char *pwd)
+{
+	int	i;
+
+	i = 0;
+	if (!pwd)
+		return (NULL);
+	while (pwd && pwd[i] && i < 4)
+	{
+		pwd = rmv_char(pwd, 0);
+		i++;
+	}
+	return (pwd);
+}
 
 static char	*get_home(t_minishell *minishell)
 {
@@ -51,23 +66,29 @@ int	ft_cd(t_minishell *minishell)
 	int		i;
 	char	*target;
 	char	*pwd;
+	char	*temp;
 
 	target = set_target(minishell);
 	if (!target)
 		return (0);
 	if (chdir(target) == -1)
-		return (get_error(minishell, NULL));
+		return (free(target), get_error(minishell, NULL));
 	pwd = getcwd(NULL, 0);
 	i = 0;
 	while (minishell->env[i])
 	{
 		if (ft_strncmp(minishell->env[i], "PWD=", 4) == 0)
 		{
-			free(minishell->env[i]);
+			temp = ft_strjoin("OLDPWD=", trim_pwd(minishell->env[i]));
+			if (!temp)
+				return (free(pwd), free(target), 0);
+			ft_export(minishell, temp);
+			if (!minishell->env)
+				return (free(temp), free(pwd), free(target), 0);
+			(free(minishell->env[i]), free(minishell->path));
 			minishell->env[i] = ft_strjoin("PWD=", pwd);
-			free(minishell->path);
 			minishell->path = ft_strdup(pwd);
-			return (free(pwd), free(target), 0);
+			return (free(temp), free(pwd), free(target), 0);
 		}
 		i++;
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: soelalou <soelalou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: balthazar <balthazar@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/17 20:38:38 by soelalou          #+#    #+#             */
-/*   Updated: 2024/03/05 16:49:13 by soelalou         ###   ########.fr       */
+/*   Updated: 2024/03/19 12:54:24 by balthazar        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,8 @@ static int	length_before_equal(char *str)
 
 static int	replace_var(t_minishell *minishell, char **var, char *arg)
 {
-	free(*var);
+	if (*var)
+		free(*var);
 	*var = ft_strdup(arg);
 	if (!(*var))
 		return (get_error(minishell, NULL));
@@ -53,12 +54,14 @@ static int	check(t_minishell *minishell, char *arg)
 		i++;
 	}
 	var_name[i] = '\0';
+	if (i >= 1 && arg[i] == '=' && arg[i - 1] == ' ')
+		return(free(var_name), -1);
 	if (!arg[i] || arg[0] == '=' || arg[ft_strlen(arg) - 2] == '=')
 		return (free(var_name), -1);
 	i = -1;
 	while (minishell->env[++i])
 		if (!ft_strncmp(minishell->env[i], var_name, length_before_equal(arg)))
-			return (replace_var(minishell, &minishell->env[i], arg), -1);
+			return (replace_var(minishell, &minishell->env[i], arg), free(var_name), -1);
 	return (free(var_name), 0);
 }
 
